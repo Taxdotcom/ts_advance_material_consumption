@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <record id="ts_consumption_category" model="ir.module.category">
+            <field name="name">Material Consumption</field>
+            <field name="description">Helps in access control of users.</field>
+            <field name="sequence">10</field>
+            <field name="parent_id" eval="False"/>
+        </record>
+
+        <record id="ts_category_consumption_request" model="ir.module.category">
+            <field name="name">Consumption Request</field>
+            <field name="sequence">11</field>
+            <field name="parent_id" ref="ts_consumption_category"/>
+        </record>
+        <record id="ts_category_consumption_approval" model="ir.module.category">
+            <field name="name">Consumption Approval</field>
+            <field name="sequence">12</field>
+            <field name="parent_id" ref="ts_consumption_category"/>
+        </record>
+        <record id="ts_category_consumption_manager" model="ir.module.category">
+            <field name="name">Consumption Manager</field>
+            <field name="sequence">13</field>
+            <field name="parent_id" ref="ts_consumption_category"/>
+        </record>
+
+        <!--GROUPS-->
+        <!--GROUPS: FOR REQUESTS-->
+        <record model="res.groups" id="group_consumption_request_user_own_docs">
+            <field name="name">Own Docs only</field>
+            <field name="category_id" ref="ts_advance_material_consumption.ts_category_consumption_request"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <record model="res.groups" id="group_consumption_request_user">
+            <field name="name">All Documents</field>
+            <field name="category_id" ref="ts_advance_material_consumption.ts_category_consumption_request"/>
+            <field name="implied_ids"
+                   eval="[(4, ref('ts_advance_material_consumption.group_consumption_request_user_own_docs'))]"/>
+        </record>
+
+        <!--GROUPS: FOR APPROVAL-->
+        <record model="res.groups" id="group_consumption_approval">
+            <field name="name">Approval</field>
+            <field name="category_id" ref="ts_advance_material_consumption.ts_category_consumption_approval"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record model="res.groups" id="group_consumption_manager">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="ts_advance_material_consumption.ts_category_consumption_manager"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+
+    </data>
+    <data>
+        <record id="access_consumption_own_doc" model="ir.rule">
+            <field name="name">Own Documents Only Access</field>
+            <field name="model_id" ref="model_stock_consumption"/>
+            <field name="domain_force">['|',('request_initiator_id', '=', user.id),('request_initiator_id', '=',
+                False)]
+            </field>
+            <field name="groups" eval="[(4, ref('ts_advance_material_consumption.group_consumption_request_user_own_docs'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="access_consumption_all_doc" model="ir.rule">
+            <field name="name">All Documents Access</field>
+            <field name="model_id" ref="model_stock_consumption"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('ts_advance_material_consumption.group_consumption_request_user'))]"/>
+
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_consumption_lines" model="ir.ui.view">
+        <field name="name">view.consumption.lines</field>
+        <field name="model">stock.consumption.lines</field>
+        <field name="arch" type="xml">
+            <tree default_order="location_id, product_id" editable="bottom" create="1" edit="1">
+                <field name="state" invisible="1"/>
+                <field name="consumption_qty_set" invisible="1"/>
+                <header>
+                    <button name="action_apply_consumption" groups="stock.group_stock_manager" type="object"
+                            string="Apply"/>
+                </header>
+                <field name="consumption_id" invisible="1"/>
+                <field name="location_id" domain="[('usage', 'in', ['internal', 'transit'])]"
+                       attrs="{'readonly': [('id', '!=', False)]}" invisible="context.get('hide_location', False)"
+                       options="{'no_create': True}"/>
+                <field name="product_id" attrs="{'readonly': [('id', '!=', False)]}"
+                       readonly="context.get('single_product', False)" force_save="1" options="{'no_create': True}"/>
+                <field name="quantity" optional="show" string="On Hand Quantity"/>
+                <field name="inventory_quantity" widget="counted_quantity_widget" invisible="1"/>
+                <field name="consume_qty" attrs="{'readonly': [('state', '==', 'done')]}"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_consumption_form" model="ir.ui.view">
+        <field name="name">stock.consumption.form</field>
+        <field name="model">stock.consumption</field>
+        <field name="arch" type="xml">
+            <form string="Consumption Request">
+                <field name="company_id" invisible="1"/>
+                <header>
+                    <button name="action_start" states="draft" string="Request for Approval" type="object"
+                            class="oe_highlight"
+                            groups="ts_advance_material_consumption.group_consumption_request_user_own_docs"/>
+                    <button name="action_approve_request" states="pending_approval" string="Approve" type="object"
+                            class="oe_highlight"
+                            groups="ts_advance_material_consumption.group_consumption_approval"/>
+                    <button name="action_reject_request" states="pending_approval" string="Reject" type="object"
+                            class="oe_highlight"
+                            groups="ts_advance_material_consumption.group_consumption_approval"/>
+                    <button name="action_view_consumptions_lines" states="confirm" string="Consume"
+                            type="object" class="oe_highlight"
+                            groups="ts_advance_material_consumption.group_consumption_manager"/>
+                    <button name="action_cancel_consumption" states="done" string="Cancel"
+                            type="object" class="oe_highlight"
+                            groups="ts_advance_material_consumption.group_consumption_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,pending_approval,confirm,done"/>
+                </header>
+
+
+                <sheet>
+                    <field name="has_account_moves" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button string="Product Moves" type="object"
+                                name="action_view_related_move_lines"
+                                class="oe_stat_button" icon="fa-exchange"
+                                attrs="{'invisible': [('state', 'not in', ['done','cancel'])]}"
+                                context="{'no_reference': True}"/>
+                        <button name="action_get_account_moves" type="object"
+                                string="Accounting Entries" icon="fa-usd" class="oe_stat_button"
+                                attrs="{'invisible': [('has_account_moves', '=', False)]}"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" invisible="0" readonly="1" placeholder="e.g. Consumption Request"/>
+                        </h1>
+                    </div>
+                    <group name="consumption_details">
+                        <group>
+                            <field name="location_ids" options="{'no_create': True}"/>
+
+                            <field name="request_initiator_id" options="{'no_create': True}"
+                                   attrs="{'invisible': [('state', 'not in', ['pending_approval','confirm','done'])]}"/>
+                            <field name="approver_id" options="{'no_create': True}"
+                                   attrs="{'invisible': [('state', 'not in', ['confirm','done'])]}"/>
+
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="company_id" groups="base.group_multi_company"
+                                   options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="line_ids" attrs="{'readonly': [('state', '!=', 'draft')]}">
+                                <tree string="Products" editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="consume_qty"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_consumption_tree" model="ir.ui.view">
+        <field name="name">stock.consumption.tree</field>
+        <field name="model">stock.consumption</field>
+        <field name="arch" type="xml">
+            <tree string="Consumption" sample="1">
+                <field name="date"/>
+                <field name="name"/>
+                <field name="location_ids" options="{'no_create': True}"/>
+                <field name="product_ids" widget="many2many_tags" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                <field name="request_initiator_id" options="{'no_create': True}"/>
+                <field name="approver_id" options="{'no_create': True}"/>
+                <field name="state" widget="badge" decoration-success="state == 'done'"
+                       decoration-info="state in ('draft', 'confirm')"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_consumption_request_form" model="ir.actions.act_window">
+        <field name="name">Consumption Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.consumption</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new consumption request
+            </p>
+        </field>
+    </record>
+
+    <record id="view_consumption_search" model="ir.ui.view">
+        <field name="name">view.consumption search</field>
+        <field name="model">stock.consumption</field>
+        <field name="arch" type="xml">
+            <search string="Search Consumptions">
+                <field name="request_initiator_id"/>
+                <field name="approver_id"/>
+                <group string="Group By...">
+                    <filter name="request_initiator_id" string="Request Initiator" domain="[]"
+                            context="{'group_by':'request_initiator_id'}"/>
+                    <filter name="approver_id" string="Approver" domain="[]" context="{'group_by':'approver_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <menuitem
+            name="Material Consumption"
+            action="ts_advance_material_consumption.action_consumption_request_form"
+            id="material_consumption_menu"
+            parent="stock.menu_stock_warehouse_mgmt"
+            sequence="1"/>
+
+
+    <!--  EXTENSION CODE  -->
+    <data>
+        <record id="view_consumption_form_ext" model="ir.ui.view">
+            <field name="name">stock.consumption.ext.form</field>
+            <field name="model">stock.consumption</field>
+            <field name="inherit_id" ref="ts_advance_material_consumption.view_consumption_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='consumption_details']/group[1]" position="inside">
+                    <field name="partner_id"/>
+                </xpath>
+                <xpath expr="//group[@name='consumption_details']/group[2]" position="inside">
+                    <field name="adjusted" invisible="1"/>
+                    <field name="op_type"/>
+                    <field name="expense_account_id" options="{'no_create': True}"
+                           attrs="{'required': [('op_type', 'not in', ['delay',False, ''])],
+                           'invisible':[('op_type','in',['delay',False,''])]}"/>
+                    <field name="analytic_account_id" groups="analytic.group_analytic_accounting"/>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="action_adjustment_entry"
+                            string="Adjustment Entry"
+                            type="object"
+                            groups="ts_advance_material_consumption.group_consumption_manager"
+                            attrs="{'invisible': ['|','|',('op_type','in',['personal',False,'']),
+                            ('adjusted','=',True),('state','=','cancel')]}"
+                    />
+                </xpath>
+            </field>
+        </record>
+        <record id="ts_action_confirm_entry" model="ir.actions.server">
+            <field name="name">Adjustment Entries</field>
+            <field name="model_id" ref="ts_advance_material_consumption.model_stock_consumption"/>
+            <field name="binding_model_id"
+                   ref="ts_advance_material_consumption.model_stock_consumption"/>
+            <field name="help">This wizard will create all journal entries for adjustments.</field>
+            <field name="state">code</field>
+            <field name="groups_id"
+                   eval="[(4, ref('ts_advance_material_consumption.group_consumption_manager'))]"/>
+            <field name="code">action = records.action_all_adjustments()</field>
+        </record>
+    </data>
+
+</odoo>
