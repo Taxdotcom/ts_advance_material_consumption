@@ -1,6 +1,6 @@
 # noinspection PyStatementEffect
 {
-    'name': 'Material Consumption',
+    'name': 'Advance Material Consumption (With Advance Rights of Requester , Approval and Consumption Manager Access Rights )',
     'version': '16.0.1',
     'category': 'Inventory',
     'summary': 'Material consumption',
