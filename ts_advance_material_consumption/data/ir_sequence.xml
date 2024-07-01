@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="ir_sequence_material_consumption_request" model="ir.sequence">
+            <field name="name">Material consumption request</field>
+            <field name="code">material.consumption.request</field>
+            <field name="prefix">MC-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

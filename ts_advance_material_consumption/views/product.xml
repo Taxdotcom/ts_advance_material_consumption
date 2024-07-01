@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="view_template_property_form_consumption_location" model="ir.ui.view">
+        <field name="name">product.template.stock.property.form.consumption.location</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stock.view_template_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='stock_property']" position="replace">
+                <!--                /field[@name='property_stock_inventory']-->
+                <group string="Counterpart Locations" name="stock_property">
+                    <field name="property_stock_production" groups="base.group_no_one"/>
+                    <field name="property_stock_inventory" groups="base.group_no_one"/>
+                    <field name="consumption_location_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

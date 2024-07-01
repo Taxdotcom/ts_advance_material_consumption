@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_adjustment_entry_form" model="ir.ui.view">
+            <field name="name">adjustment.entry.wizard.form</field>
+            <field name="model">adjustment.entry.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="account_id" options="{'no_create': True}" />
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Create and post move" type="object" class="oe_highlight" name="create_move"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_adjustment_entry_wizard" model="ir.actions.act_window">
+            <field name="name">Adjustment Entry</field>
+            <field name="res_model">adjustment.entry.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="ts_advance_material_consumption.view_adjustment_entry_form"/>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>
