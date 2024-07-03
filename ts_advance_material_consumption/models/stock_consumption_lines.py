@@ -51,6 +51,10 @@ class ConsumptionLines(models.Model):
         :return: dict with all values needed to create a new `stock.move` with its move line.
         """
         self.ensure_one()
+        if self.env.context.get('force_period_date'):
+            date = self.env.context.get('force_period_date')
+        else:
+            date = fields.Date.context_today(self)
         if fields.Float.is_zero(qty, 0, precision_rounding=self.product_uom_id.rounding):
             name = _('Product Quantity Confirmed')
         else:
@@ -66,10 +70,12 @@ class ConsumptionLines(models.Model):
             'location_dest_id': location_dest_id.id,
             'is_inventory': True,
             'picked': True,
+            'date': date,
             'move_line_ids': [(0, 0, {
                 'product_id': self.product_id.id,
                 'product_uom_id': self.product_uom_id.id,
                 'quantity': qty,
+                'date': date,
                 'location_id': location_id.id,
                 'location_dest_id': location_dest_id.id,
                 'company_id': self.company_id.id or self.env.company.id,

@@ -1,7 +1,7 @@
 # noinspection PyStatementEffect
 {
     'name': 'Advance Material Consumption (With Advance Rights of Requester , Approval and Consumption Manager Access Rights )',
-    'version': '17.0.0.1',
+    'version': '16.0.1',
     'category': 'Inventory',
     'summary': 'Material consumption',
     'author': 'TeamUp4Solutions, TaxDotCom',
@@ -21,7 +21,7 @@
     'installable': True,
     'application': True,
     'auto_install': False,
-    'price': 85.00,
+    'price': 80.00,
     'currency': 'EUR',
     # 'images': ['static/description/banner.png', 'static/description/icon.png'],
     'images': ['static/description/icon.png'],

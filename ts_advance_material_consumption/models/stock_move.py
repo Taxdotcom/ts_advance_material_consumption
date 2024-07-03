@@ -4,75 +4,33 @@ from odoo import models, fields, _
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
-    def _get_inventory_move_values(self, qty, location_id, location_dest_id, out=False, consumption_id=False):
-        """ Called when user manually set a new quantity (via `inventory_quantity`)
-        just before creating the corresponding stock move.
-
-        :param location_id: `stock.location`
-        :param location_dest_id: `stock.location`
-        :param consumption_id: 'stock.consumption'
-        :param out: boolean to set on True when the move go to inventory adjustment location.
-        :return: dict with all values needed to create a new `stock.move` with its move line.
-        """
+    def _get_revert_inventory_move_values(self):
         self.ensure_one()
-        if fields.Float.is_zero(qty, 0, precision_rounding=self.product_uom_id.rounding):
-            name = _('Product Quantity Confirmed')
-        else:
-            name = _('Product Quantity Updated')
-        return {
-            'name': self.env.context.get('inventory_name') or name,
+        vals = {
+            'name': _('%s [reverted]', self.reference),
             'product_id': self.product_id.id,
             'product_uom': self.product_uom_id.id,
-            'product_uom_qty': qty,
+            'product_uom_qty': self.qty_done,
             'company_id': self.company_id.id or self.env.company.id,
             'state': 'confirmed',
-            'location_id': location_id.id,
-            'location_dest_id': location_dest_id.id,
+            'location_id': self.location_dest_id.id,
+            'location_dest_id': self.location_id.id,
             'is_inventory': True,
-            'picked': True,
+            'consumption_id': self.move_id.consumption_id.id if self.move_id.consumption_id else '',
             'move_line_ids': [(0, 0, {
                 'product_id': self.product_id.id,
                 'product_uom_id': self.product_uom_id.id,
-                'quantity': qty,
-                'location_id': location_id.id,
-                'location_dest_id': location_dest_id.id,
+                'qty_done': self.qty_done,
+                'location_id': self.location_dest_id.id,
+                'location_dest_id': self.location_id.id,
                 'company_id': self.company_id.id or self.env.company.id,
-                'lot_id': self.lot_id.id or False,
-                'package_id': out and self.package_id.id or False,
-                'result_package_id': (not out) and self.package_id.id or False,
-                'owner_id': self.owner_id.id or False,
-            })],
-            'consumption_id': consumption_id
+                'lot_id': self.lot_id.id,
+                'package_id': self.package_id.id,
+                'result_package_id': self.package_id.id,
+                'owner_id': self.owner_id.id,
+            })]
         }
-
-    def _get_revert_inventory_move_values(self):
-        self.ensure_one()
-        res = self._get_inventory_move_values(self.quantity, self.location_id, self.location_dest_id, out=False, consumption_id=self.move_id.consumption_id)
-        # vals = {
-        #     'name': _('%s [reverted]', self.reference),
-        #     'product_id': self.product_id.id,
-        #     'product_uom': self.product_uom_id.id,
-        #     'product_uom_qty': self.quantity,
-        #     'company_id': self.company_id.id or self.env.company.id,
-        #     'state': 'confirmed',
-        #     'location_id': self.location_dest_id.id,
-        #     'location_dest_id': self.location_id.id,
-        #     'is_inventory': True,
-        #     'consumption_id': self.move_id.consumption_id.id if self.move_id.consumption_id else '',
-        #     'move_line_ids': [(0, 0, {
-        #         'product_id': self.product_id.id,
-        #         'product_uom_id': self.product_uom_id.id,
-        #         'quantity': self.quantity,
-        #         'location_id': self.location_dest_id.id,
-        #         'location_dest_id': self.location_id.id,
-        #         'company_id': self.company_id.id or self.env.company.id,
-        #         'lot_id': self.lot_id.id,
-        #         'package_id': self.package_id.id,
-        #         'result_package_id': self.package_id.id,
-        #         'owner_id': self.owner_id.id,
-        #     })]
-        # }
-        # return vals
+        return vals
 
 
 class StockMove(models.Model):

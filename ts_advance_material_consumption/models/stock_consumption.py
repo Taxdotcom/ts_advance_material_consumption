@@ -10,7 +10,8 @@ class StockConsumption(models.Model):
     _description = "Inventory Consumption"
     _order = "date desc, id desc"
 
-    company_id = fields.Many2one('res.company', 'Company', readonly=True, index=True, required=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one('res.company', 'Company', readonly=True, index=True, required=True,
+                                 states={'draft': [('readonly', False)]}, default=lambda self: self.env.company)
 
     @api.model
     def _domain_location_id(self):
@@ -74,32 +75,33 @@ class StockConsumption(models.Model):
         string='Status', default='draft', copy=False, index=True, readonly=True, tracking=True,
         selection=[('draft', 'Draft'), ('pending_approval', 'Awaiting Approval'),
                    ('confirm', 'Approved'), ('done', 'Validated'), ('cancel', 'Cancelled')])
-    name = fields.Char('Reference', default="New", readonly=True, required=True)
+    name = fields.Char('Reference', default="New", readonly=True, required=True,
+                       states={'draft': [('readonly', False)]})
     date = fields.Datetime(
         'Inventory Date', required=True, default=fields.Datetime.now,
         help="If the inventory adjustment is not validated, date at which the theoretical quantities have been "
              "checked.\n If the inventory adjustment is validated, date at which the inventory adjustment has been "
              "validated.")
-    request_initiator_id = fields.Many2one('res.users', 'Request Initiator', check_company=True, readonly=True)
+    request_initiator_id = fields.Many2one('res.users', 'Request Initiator', check_company=True, readonly=True,
+                                           states={'draft': [('readonly', False)]})
     approver_id = fields.Many2one('res.users', 'Approver', check_company=True, readonly=True)
 
     product_ids = fields.Many2many('product.product', string='Products', check_company=True,
                                    domain=lambda self: self._domain_product_ids(),
-                                   readonly=True,
+                                   readonly=True, states={'draft': [('readonly', False)]},
                                    help="Specify Products to focus your consumption on particular Products.")
 
     location_ids = fields.Many2one(
-        'stock.location', string='Locations', index=True, readonly=True, check_company=True,
-        required=True, ondelete='restrict',
+        'stock.location', string='Locations', index=True, check_company=True,
+        states={'draft': [('readonly', False)]}, required=True, ondelete='restrict',
         domain=[('usage', 'in', ['internal'])])
-
-    # states = {'draft': [('readonly', False)]},
-
     line_ids = fields.One2many(
         'stock.consumption.lines', 'consumption_id', string='Consumptions',
-        copy=False, readonly=False)
+        copy=False, readonly=False,
+        states={'done': [('readonly', True)]})
     move_ids = fields.One2many(
-        'stock.move', 'consumption_id', string='Created Moves')
+        'stock.move', 'consumption_id', string='Created Moves',
+        states={'done': [('readonly', True)]})
 
     has_account_moves = fields.Boolean(string='Has Entries', compute='_compute_has_account_moves', store=False)
 
@@ -199,7 +201,6 @@ class StockConsumption(models.Model):
         moves_done = moves._action_done()
         moves_done.mapped('move_line_ids').write({'date': self.date})
         moves_done.write({'date': self.date})
-        # datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
         if moves_done:
             self.state = 'done'
 

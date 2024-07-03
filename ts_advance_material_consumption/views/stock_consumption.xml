@@ -11,10 +11,12 @@
                     <button name="action_start" invisible="state != 'draft'" string="Request for Approval" type="object"
                             class="oe_highlight"
                             groups="ts_advance_material_consumption.group_consumption_request_user_own_docs"/>
-                    <button name="action_approve_request" invisible="state != 'pending_approval'" string="Approve" type="object"
+                    <button name="action_approve_request" invisible="state != 'pending_approval'" string="Approve"
+                            type="object"
                             class="oe_highlight"
                             groups="ts_advance_material_consumption.group_consumption_approval"/>
-                    <button name="action_reject_request" invisible="state != 'pending_approval'" string="Reject" type="object"
+                    <button name="action_reject_request" invisible="state != 'pending_approval'" string="Reject"
+                            type="object"
                             class="oe_highlight"
                             groups="ts_advance_material_consumption.group_consumption_approval"/>
                     <button name="action_view_consumptions_lines" invisible="state != 'confirm'" string="Consume"
@@ -48,10 +50,11 @@
                     </div>
                     <group name="consumption_details">
                         <group>
-                            <field name="location_ids" options="{'no_create': True}" readonly="state != 'draft'"/>
+                            <field name="location_ids" options="{'no_create': True}"
+                                   readonly="state in ('pending_approval','confirm','done')"/>
 
                             <field name="request_initiator_id" options="{'no_create': True}"
-                                   invisible="state not in ('pending_approval','confirm','done')" readonly="state != 'draft'"/>
+                                   invisible="state not in ('pending_approval','confirm','done')"/>
 
                             <field name="approver_id" options="{'no_create': True}"
                                    invisible="state not in ('confirm','done')"/>
@@ -60,14 +63,14 @@
                         <group>
                             <field name="date"/>
                             <field name="company_id" groups="base.group_multi_company"
-                                   options="{'no_create': True}" readonly="state != 'draft'"/>
+                                   options="{'no_create': True}"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Products" name="products">
-                            <field name="line_ids" readonly="state == 'done'">
+                            <field name="line_ids" readonly="state != 'draft'">
                                 <tree string="Products" editable="bottom">
-                                    <field name="company_id" column_invisible="True"/>
+                                    <field name="company_id" column_invisible="1"/>
                                     <field name="product_id"/>
                                     <field name="product_uom_id"/>
                                     <field name="consume_qty"/>
@@ -94,7 +97,7 @@
                 <field name="date"/>
                 <field name="name"/>
                 <field name="location_ids" options="{'no_create': True}"/>
-                <field name="product_ids" widget="many2many_tags" optional="hide" readonly="state != 'draft'"/>
+                <field name="product_ids" widget="many2many_tags" optional="hide"/>
                 <field name="company_id" groups="base.group_multi_company" optional="show"/>
                 <field name="request_initiator_id" options="{'no_create': True}"/>
                 <field name="approver_id" options="{'no_create': True}"/>
